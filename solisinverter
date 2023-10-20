@@ -1,0 +1,628 @@
+esphome:
+  name: "solisinverter"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+###############################################Anfang immer gleich #######################################################
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret encryption_key 
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Seplos-Modbus Fallback Hotspot"
+    password: !secret ap_password
+
+captive_portal:
+##############################################Ende immer gleich ########################################################
+
+
+
+substitutions:
+  update_time: 20s
+
+
+uart:
+  - id: mod_bus_Inverter
+    tx_pin: GPIO17
+    rx_pin: GPIO16
+    baud_rate: 9600
+    stop_bits: 1
+
+  - id: mod_bus_bms
+    tx_pin: GPIO27
+    rx_pin: GPIO14
+    baud_rate: 9600
+    stop_bits: 1
+
+modbus:
+  uart_id: mod_bus_Inverter
+#  flow_control_pin: 4
+  id: modbus1
+
+modbus_controller:
+  - id: inverter
+    address: 0x1
+    modbus_id: modbus1
+#    setup_priority: -10
+
+
+sensor:
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: model_no
+    name: "Model No."
+    address: 33000
+    register_type: read
+    value_type: U_WORD
+    icon: mdi:alien
+ 
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Year
+    name: "Year"
+    address: 33022
+    register_type: read
+    value_type: U_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Month
+    name: "Month"
+    address: 33023
+    register_type: read
+    value_type: U_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Day
+    name: "Day"
+    address: 33024
+    register_type: read
+    value_type: U_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Hour
+    name: "Hour"
+    address: 33025
+    register_type: read
+    value_type: U_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Minute
+    name: "Minute"
+    address: 33026
+    register_type: read
+    value_type: U_WORD
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Second
+    name: "Second"
+    address: 33027
+    register_type: read
+    value_type: U_WORD    
+
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Today_energy_generation
+    name: "Today energy generation"
+    address: 33035
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+    device_class: energy
+    icon: mdi:solar-power
+    state_class: total_increasing
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Yesterday_energy_generation
+    name: "Yesterday energy generation"
+    address: 33036
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    device_class: energy
+    icon: mdi:solar-power
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Year_energy_generation
+    name: "Year energy generation"
+    address: 33037
+    register_type: read
+    value_type: U_DWORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 0
+    device_class: energy
+    icon: mdi:solar-power
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Last_Year_energy_generation
+    name: "Last Year energy generation"
+    address: 33039
+    register_type: read
+    value_type: U_DWORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 0
+    device_class: energy
+    icon: mdi:solar-power       
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: DC_Voltage_1
+    name: "DC Voltage 1"
+    address: 33049
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    icon: mdi:flash
+ 
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: DC_Current_1
+    name: "DC Current 1"
+    address: 33050
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    icon: mdi:current-dc   
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: DC_Voltage_2
+    name: "DC Voltage 2"
+    address: 33051
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    icon: mdi:flash 
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: DC_Current_2
+    name: "DC Current 2"
+    address: 33052
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    icon: mdi:current-dc 
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Total_DC_output_power
+    name: "Total DC output power"
+    address: 33057
+    register_type: read
+    value_type: U_DWORD
+    unit_of_measurement: "W"
+    icon: mdi:flash
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Active_power
+    name: "Active power"
+    address: 33079
+    register_type: read
+    value_type: S_DWORD
+    unit_of_measurement: "W"
+    icon: mdi:flash
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: internal_temp
+    name: "internal Temp"
+    address: 33093
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "C"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    icon: mdi:temperature-celsius
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Grid_frequency
+    name: "Grid frequency"
+    address: 33094
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "Hz"
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.01
+    icon: mdi:dots-grid
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Meter_active_power
+    name: "Meter active power"
+    address: 33130
+    register_type: read
+    value_type: S_DWORD
+    unit_of_measurement: "W"
+    accuracy_decimals: 2
+    icon: mdi:dots-grid
+
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Battery_voltage
+    name: "Battery voltage"
+    address: 33133
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    icon: mdi:flash
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Battery_current
+    name: "Battery current"
+    address: 33134
+    register_type: read
+    value_type: S_WORD
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.1
+    icon: mdi:current-dc
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Battery_current_direction
+    name: "Battery current direction"
+    address: 33135
+    register_type: read
+    value_type: U_WORD
+    icon: mdi:arrow-top-left-bottom-right
+
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Battery_capacity_SOC
+    name: "Battery capacity SOC"
+    address: 33139
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "%"
+    icon: mdi:percent
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Battery_voltage_from_BMS
+    name: "Battery valtage from BMS"
+    address: 33141
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Battery_current_from_BMS
+    name: "Battery current from BMS"
+    address: 33142
+    register_type: read
+    value_type: S_WORD
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    filters:
+      - multiply: 0.01
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Household_load_power
+    name: "Household load power"
+    address: 33147
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "W"
+    icon: mdi:current-ac
+    device_class: energy
+    state_class: measurement
+    
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Battery_power
+    name: "Battery power"
+    address: 33149
+    register_type: read
+    value_type: S_DWORD
+    unit_of_measurement: "W"
+    icon: mdi:current-dc
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Inverter_AC_Grid_Port_Power
+    name: "Inverter AC Grid Port Power"
+    address: 33151
+    register_type: read
+    value_type: S_DWORD
+    unit_of_measurement: "W"
+    icon: mdi:current-ac
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Today_battery_charge_energy
+    name: "Today battery charge energy"
+    address: 33163
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+    device_class: energy
+    icon: mdi:battery-plus
+    state_class: total_increasing
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Today_battery_discharge_energy
+    name: "Today battery discharge energy"
+    address: 33167
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+    device_class: energy
+    icon: mdi:battery-minus
+    state_class: total_increasing
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Today_energy_imported_from_grid
+    name: "Today energy imported from grid"
+    address: 33171
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+    device_class: energy
+    icon: mdi:import
+    state_class: total_increasing
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Today_energy_fed_into_grid
+    name: "Today energy fed into grid"
+    address: 33175
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+    device_class: energy
+    icon: mdi:export
+    state_class: total_increasing
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Total_house_load
+    name: "Total house load"
+    address: 33177
+    register_type: read
+    value_type: U_DWORD
+    unit_of_measurement: "kW"
+    accuracy_decimals: 2
+    device_class: energy
+    icon: mdi:export
+
+
+  - platform: modbus_controller
+    modbus_controller_id: inverter
+    id: Today_load_energy_consumption
+    name: "Today load energy consumption"
+    address: 33179
+    register_type: read
+    value_type: U_WORD
+    unit_of_measurement: "kWh"
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.1
+    device_class: energy
+    icon: mdi:greenhouse
+    state_class: total_increasing
+
+  - platform: template
+    id: DC_Power_1
+    name: "DC Power 1"
+    lambda: return id(DC_Current_1).state * id(DC_Voltage_1).state ;
+    accuracy_decimals: 0
+    unit_of_measurement: W
+    device_class: power
+    update_interval: ${update_time}
+
+  - platform: template
+    id: DC_Power_2
+    name: "DC Power 2"
+    lambda: return id(DC_Current_2).state * id(DC_Voltage_2).state;
+    accuracy_decimals: 0
+    unit_of_measurement: W
+    device_class: power
+    update_interval: ${update_time}
+
+  - platform: template
+    id: Battery_charge_Power
+    name: "Battery_charge_Power"
+    lambda: !lambda |-
+      if (id(Battery_current_direction).state < 1 ) {
+        return {id(Battery_power).state * 0.001} ;
+      }
+      else {
+        return {0} ;
+      }
+    unit_of_measurement: kW
+    device_class: power
+
+
+  - platform: template
+    id: Battery_discharge_Power
+    name: "Battery_discharge_Power"
+    lambda: !lambda |-
+      if (id(Battery_current_direction).state < 1 ) {
+        return {0} ;
+      }
+      else {
+        return {id(Battery_power).state * 0.001 } ;
+      }
+    unit_of_measurement: kW
+    device_class: power  
+
+
+
+
+#
+#   Für das Energy Dashboard werden statistiken erzeugt --> geht nicht --> glaube ich
+#
+
+#  - platform: total_daily_energy #Export
+ #   id: DES_Today_energy_fed_into_grid
+  #  name: "DES Today energy fed into grid"
+   # power_id: Today_energy_fed_into_grid
+    #device_class: energy
+#    state_class: total_increasing
+ #   unit_of_measurement: kW
+  #  accuracy_decimals: 2
+   # icon: mdi:export 
+
+#  - platform: total_daily_energy #Import
+ #   id: DES_Today_energy_imported_from_grid
+  #  name: "DES Today energy imported from grid"
+   # power_id: Today_energy_imported_from_grid
+    #device_class: energy
+    #state_class: total_increasing
+    #unit_of_measurement: kW
+#    accuracy_decimals: 2
+ #   icon: mdi:import
+
+  #- platform: total_daily_energy #Gesammt
+   # id: DES_Today_load_energy_consumption
+#    name: "DES Today load energy consumption"
+ #   power_id: Today_load_energy_consumption
+  #  device_class: energy
+   # state_class: total_increasing
+    #unit_of_measurement: kW
+#    accuracy_decimals: 2
+ #   icon: mdi:greenhouse
+#
+ # - platform: total_daily_energy #Batterie entladen
+  #  id: DES_Today_battery_discharge_energy
+   # name: "DES today_battery_discharge_energy"
+    #power_id: Today_battery_discharge_energy
+#    device_class: energy
+ #   state_class: total_increasing
+  #  unit_of_measurement: kW
+   # accuracy_decimals: 2
+    #icon: mdi:export
+#
+#  - platform: total_daily_energy #Batterie laden
+ #   id: DES_Today_battery_charge_energy
+  #  name: "DES today_battery_charge_energy"
+   # power_id: Today_battery_charge_energy
+    #device_class: energy
+#    state_class: total_increasing
+ #   unit_of_measurement: kW
+  #  accuracy_decimals: 2
+   # icon: mdi:import
+
+  - platform: total_daily_energy #Solarpanel 1
+    id: Today_DC_Power_1
+    name: "Today DC Power 1"
+    power_id: DC_Power_1
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kW
+    accuracy_decimals: 2
+    filters:
+      - multiply: 0.001
+    icon: mdi:solar-power
+
+  - platform: total_daily_energy #Solarpanel 2
+    id: Today_DC_Power_2
+    name: "Today DC Power 2"
+    power_id: DC_Power_2
+    device_class: energy
+    state_class: total_increasing
+    unit_of_measurement: kW
+    filters:
+      - multiply: 0.001
+    icon: mdi:solar-power
+
+
+
+
+
+
+text_sensor:
+  - platform: template
+    id: Battery_current_direction_1
+    name: "Battery current direction 1"
+    lambda: !lambda |-
+      if (id(Battery_current_direction).state < 1 ) {
+        return {"Wird geladen"} ;
+      }
+      else {
+        return {"Wird entladen"} ;
+      }
+    icon: mdi:arrow-top-left-bottom-right
+
+
+
+time:
+  - platform: sntp
+    id: my_time
+
+
+
